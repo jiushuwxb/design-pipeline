@@ -1,0 +1,50 @@
+[
+  {
+    "id": "dashboard-shell",
+    "name": "Dashboard Shell",
+    "purpose": "Define the core admin layout and navigation model.",
+    "bestFor": ["admin", "CRM", "operations"],
+    "structure": ["sidebar", "topbar", "page title", "actions", "content grid"],
+    "compositionNotes": "Use for product screens rather than marketing pages."
+  },
+  {
+    "id": "kpi-row",
+    "name": "KPI Row",
+    "purpose": "Summarize business or operational status.",
+    "bestFor": ["dashboard", "monitoring", "operations"],
+    "structure": ["metric cards", "delta", "sparkline", "status"],
+    "compositionNotes": "Place at top of dashboard content."
+  },
+  {
+    "id": "filterable-data-table",
+    "name": "Filterable Data Table",
+    "purpose": "Support repeated operational work with data filtering and actions.",
+    "bestFor": ["CRM", "admin", "operations"],
+    "structure": ["filter bar", "table", "row actions", "pagination", "empty state"],
+    "compositionNotes": "Use stable row heights and clear affordances."
+  },
+  {
+    "id": "chart-analysis-grid",
+    "name": "Chart Analysis Grid",
+    "purpose": "Show trends, breakdowns, or performance over time.",
+    "bestFor": ["analytics", "monitoring"],
+    "structure": ["chart cards", "range selector", "legend", "summary"],
+    "compositionNotes": "Use consistent chart card sizing."
+  },
+  {
+    "id": "detail-drawer",
+    "name": "Detail Drawer",
+    "purpose": "Show detail without losing list context.",
+    "bestFor": ["admin", "CRM", "ticketing"],
+    "structure": ["drawer", "metadata", "timeline", "actions", "comments"],
+    "compositionNotes": "Use as interaction state in design prompt when relevant."
+  },
+  {
+    "id": "alert-feed",
+    "name": "Alert Feed",
+    "purpose": "Show events, alerts, notifications, or activity.",
+    "bestFor": ["monitoring", "operations"],
+    "structure": ["severity rows", "timestamp", "source", "action"],
+    "compositionNotes": "Use semantic severity and readable density."
+  }
+]

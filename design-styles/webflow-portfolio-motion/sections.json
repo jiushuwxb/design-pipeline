@@ -1,0 +1,66 @@
+[
+  {
+    "id": "typographic-portfolio-hero",
+    "name": "Typographic Portfolio Hero",
+    "purpose": "Establish identity, specialty, and visual tone with expressive typography.",
+    "bestFor": ["portfolio", "creative studio", "personal brand"],
+    "structure": ["nav", "oversized name/offer", "short positioning", "selected preview", "scroll cue"],
+    "compositionNotes": "Use large type but preserve mobile readability."
+  },
+  {
+    "id": "selected-work-grid",
+    "name": "Selected Work Grid",
+    "purpose": "Showcase multiple projects with strong visual rhythm.",
+    "bestFor": ["portfolio", "agency", "case study page"],
+    "structure": ["section title", "project cards", "category/year metadata", "hover states"],
+    "compositionNotes": "Vary card sizes and aspect ratios intentionally."
+  },
+  {
+    "id": "featured-case-study",
+    "name": "Featured Case Study",
+    "purpose": "Give one project premium attention and narrative context.",
+    "bestFor": ["agency", "studio", "portfolio"],
+    "structure": ["large visual", "project title", "role", "result", "CTA"],
+    "compositionNotes": "Use after selected-work grid or as the first proof section."
+  },
+  {
+    "id": "horizontal-marquee-proof",
+    "name": "Horizontal Marquee Proof",
+    "purpose": "Create motion rhythm with services, clients, awards, or capabilities.",
+    "bestFor": ["creative studio", "portfolio"],
+    "structure": ["marquee text/list", "subtle separators", "supporting caption"],
+    "compositionNotes": "Use motion sparingly; content must remain understandable."
+  },
+  {
+    "id": "process-narrative",
+    "name": "Process Narrative",
+    "purpose": "Explain creative process as a story.",
+    "bestFor": ["studio", "service portfolio"],
+    "structure": ["numbered phases", "description", "supporting visuals"],
+    "compositionNotes": "Use editorial spacing, not boxed step cards."
+  },
+  {
+    "id": "image-led-about",
+    "name": "Image-led About",
+    "purpose": "Humanize the studio/person behind the work.",
+    "bestFor": ["portfolio", "agency"],
+    "structure": ["portrait/studio image", "bio statement", "capability list"],
+    "compositionNotes": "Make the image meaningful; avoid stock-like atmosphere."
+  },
+  {
+    "id": "awards-recognition-list",
+    "name": "Awards and Recognition List",
+    "purpose": "Show credibility through awards, press, or client outcomes.",
+    "bestFor": ["agency", "senior portfolio"],
+    "structure": ["year", "award/client", "project", "result"],
+    "compositionNotes": "Use clean rows with strong typography."
+  },
+  {
+    "id": "contact-project-cta",
+    "name": "Project Inquiry CTA",
+    "purpose": "Close with a clear collaboration invitation.",
+    "bestFor": ["portfolio", "agency", "studio"],
+    "structure": ["headline", "availability", "email/contact CTA", "social links"],
+    "compositionNotes": "Keep the close confident and minimal."
+  }
+]

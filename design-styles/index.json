@@ -1,0 +1,61 @@
+{
+  "default": "premium-bento-saas",
+  "styles": [
+    {
+      "id": "premium-bento-saas",
+      "name": "Premium Bento SaaS",
+      "useCases": ["SaaS landing", "AI product", "feature showcase"],
+      "description": "Polished SaaS style with bento grids, clear CTAs, refined gradients, and product-led sections.",
+      "intro": "适合 SaaS 官网、AI 产品页、功能展示页。高级感 bento grid、清晰 CTA、精致渐变、产品截图/指标/功能卡片。默认风格。"
+    },
+    {
+      "id": "framer-saas-minimal",
+      "name": "Framer SaaS Minimal",
+      "useCases": ["startup website", "AI tool", "developer product"],
+      "description": "Clean Framer-like product marketing with generous whitespace, crisp hierarchy, and restrained motion.",
+      "intro": "适合创业产品、AI 工具、开发者工具官网。留白多、层级干净、边框轻、装饰少，偏 Framer 模板式简洁产品营销感。"
+    },
+    {
+      "id": "linear-product-clean",
+      "name": "Linear Product Clean",
+      "useCases": ["developer tool", "B2B product", "productivity app"],
+      "description": "Precise product UI style with quiet surfaces, subtle borders, strong typography, and minimal ornament.",
+      "intro": "适合开发者工具、B2B 产品、效率工具、任务/项目管理类产品。克制、精准、偏深色产品 UI，细边框、状态列表、命令面板、产品截图感强。"
+    },
+    {
+      "id": "webflow-portfolio-motion",
+      "name": "Webflow Portfolio Motion",
+      "useCases": ["portfolio", "creative studio", "case study"],
+      "description": "Editorial portfolio style with oversized type, project grids, scroll rhythm, and expressive motion.",
+      "intro": "适合作品集、创意工作室、个人品牌、案例展示页。大字号、项目网格、滚动叙事、case study、较强动效节奏，偏 Webflow 作品集风格。"
+    },
+    {
+      "id": "awwwards-motion-brand",
+      "name": "Awwwards Motion Brand",
+      "useCases": ["brand website", "campaign site", "creative launch"],
+      "description": "High-impact brand style with immersive first screens, asymmetry, bold type, and cinematic transitions.",
+      "intro": "适合品牌官网、活动页、创意发布页、高视觉冲击项目。沉浸式首屏、非对称布局、强字体、强视觉资产、电影感动效，偏 Awwwards 创意站。"
+    },
+    {
+      "id": "dark-3d-tech",
+      "name": "Dark 3D Tech",
+      "useCases": ["AI platform", "data infrastructure", "Web3", "cyber product"],
+      "description": "Deep tech style with spatial depth, luminous edges, dark surfaces, and restrained 3D/mesh cues.",
+      "intro": "适合 AI 平台、数据基础设施、网络安全、Web3、技术型产品。深色背景、空间层次、发光边缘、数据流/网格/节点图、克制的 3D 科技感。"
+    },
+    {
+      "id": "editorial-studio",
+      "name": "Editorial Studio",
+      "useCases": ["architecture", "photography", "design studio", "premium brand"],
+      "description": "Magazine-like studio style with strong images, elegant typography, low saturation, and deliberate whitespace.",
+      "intro": "适合建筑、摄影、设计工作室、高端服务、精品品牌。杂志式排版、低饱和色、强图文关系、大留白、优雅安静，不偏 SaaS。"
+    },
+    {
+      "id": "enterprise-dashboard",
+      "name": "Enterprise Dashboard",
+      "useCases": ["admin", "operations", "CRM", "monitoring"],
+      "description": "Dense but calm operational interface with tables, filters, KPIs, hierarchy, and low decorative load.",
+      "intro": "适合后台系统、CRM、运营平台、监控系统、业务管理模块。高信息密度、KPI、筛选器、表格、图表、侧边栏、低装饰，偏生产工具界面。"
+    }
+  ]
+}

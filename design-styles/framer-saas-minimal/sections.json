@@ -1,0 +1,74 @@
+[
+  {
+    "id": "minimal-centered-hero",
+    "name": "Minimal Centered Hero",
+    "purpose": "Introduce the product with high clarity and generous whitespace.",
+    "bestFor": ["startup website", "AI tool", "developer product"],
+    "structure": ["nav", "eyebrow", "headline", "supporting copy", "CTA row", "small product preview"],
+    "compositionNotes": "Use concise copy and avoid visual clutter."
+  },
+  {
+    "id": "split-ui-preview",
+    "name": "Split UI Preview",
+    "purpose": "Pair product explanation with a clean interface preview.",
+    "bestFor": ["SaaS", "AI assistant", "developer product"],
+    "structure": ["copy column", "CTA", "UI preview column", "annotation"],
+    "compositionNotes": "Good when a product screenshot-like visual is needed early."
+  },
+  {
+    "id": "feature-row-stack",
+    "name": "Feature Row Stack",
+    "purpose": "Explain features in a calm linear sequence.",
+    "bestFor": ["simple SaaS", "tooling", "workflow product"],
+    "structure": ["feature rows", "icon", "title", "description", "small visual"],
+    "compositionNotes": "Use after hero for lightweight products."
+  },
+  {
+    "id": "three-column-benefits",
+    "name": "Three Column Benefits",
+    "purpose": "Summarize core benefits without heavy card design.",
+    "bestFor": ["marketing page", "early product"],
+    "structure": ["section title", "3 benefit columns", "small icons"],
+    "compositionNotes": "Keep each item short and parallel."
+  },
+  {
+    "id": "product-walkthrough-tabs",
+    "name": "Product Walkthrough Tabs",
+    "purpose": "Show multiple product states without a long page.",
+    "bestFor": ["AI tool", "workflow app", "platform"],
+    "structure": ["tab list", "active UI preview", "explanation panel"],
+    "compositionNotes": "Use when PRD has multiple user modes or workflows."
+  },
+  {
+    "id": "social-proof-strip",
+    "name": "Social Proof Strip",
+    "purpose": "Add lightweight trust with logos or short quotes.",
+    "bestFor": ["startup site", "SaaS"],
+    "structure": ["small label", "logo row", "quote snippet"],
+    "compositionNotes": "Keep visual weight low."
+  },
+  {
+    "id": "pricing-compact",
+    "name": "Compact Pricing",
+    "purpose": "Offer simple purchase options.",
+    "bestFor": ["SaaS", "subscription product"],
+    "structure": ["billing toggle", "2-3 plan cards", "feature checklist"],
+    "compositionNotes": "Use clean borders and no oversized pricing decoration."
+  },
+  {
+    "id": "minimal-faq",
+    "name": "Minimal FAQ",
+    "purpose": "Answer common questions without breaking rhythm.",
+    "bestFor": ["landing page", "pricing page"],
+    "structure": ["two-column FAQ", "question list", "short answers"],
+    "compositionNotes": "Use sparse dividers instead of boxed cards."
+  },
+  {
+    "id": "download-or-trial-cta",
+    "name": "Download or Trial CTA",
+    "purpose": "Drive trial, sign-up, demo, or app download.",
+    "bestFor": ["product pages"],
+    "structure": ["short headline", "CTA buttons", "micro proof text"],
+    "compositionNotes": "Keep the CTA section focused and compact."
+  }
+]

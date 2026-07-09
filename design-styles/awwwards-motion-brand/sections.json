@@ -1,0 +1,66 @@
+[
+  {
+    "id": "immersive-brand-hero",
+    "name": "Immersive Brand Hero",
+    "purpose": "Create a high-impact first impression around one strong visual idea.",
+    "bestFor": ["brand site", "campaign", "launch page"],
+    "structure": ["minimal nav", "bold brand/offer", "immersive visual", "primary CTA", "motion cue"],
+    "compositionNotes": "Use when the page needs emotional impact; keep brand/product signal concrete."
+  },
+  {
+    "id": "manifesto-section",
+    "name": "Manifesto Section",
+    "purpose": "State the brand belief or campaign thesis.",
+    "bestFor": ["brand storytelling", "creative launch"],
+    "structure": ["large statement", "supporting paragraph", "subtle proof visual"],
+    "compositionNotes": "Use large typography, but do not obscure meaning."
+  },
+  {
+    "id": "cinematic-feature-sequence",
+    "name": "Cinematic Feature Sequence",
+    "purpose": "Reveal product/brand features as a dramatic sequence.",
+    "bestFor": ["premium product", "launch page", "visual campaign"],
+    "structure": ["feature headline", "full-bleed visual", "caption", "transition cue"],
+    "compositionNotes": "Use 3-5 moments, not an endless scroll."
+  },
+  {
+    "id": "asymmetric-proof-grid",
+    "name": "Asymmetric Proof Grid",
+    "purpose": "Show proofs, features, or artifacts with dynamic composition.",
+    "bestFor": ["campaign", "brand site"],
+    "structure": ["uneven grid", "visual cards", "short metadata", "statement"],
+    "compositionNotes": "Maintain alignment rules even when layout feels expressive."
+  },
+  {
+    "id": "interactive-showcase",
+    "name": "Interactive Showcase",
+    "purpose": "Highlight interaction or motion as part of the concept.",
+    "bestFor": ["creative tech", "product launch", "motion brand"],
+    "structure": ["interactive visual zone", "controls/tabs", "microcopy", "state preview"],
+    "compositionNotes": "Interaction should communicate value, not just decoration."
+  },
+  {
+    "id": "editorial-split-story",
+    "name": "Editorial Split Story",
+    "purpose": "Create rhythm with alternating text and visual panels.",
+    "bestFor": ["brand narrative", "campaign story"],
+    "structure": ["large visual", "story text", "metadata", "section transition"],
+    "compositionNotes": "Good after the hero to slow down and explain."
+  },
+  {
+    "id": "press-awards-band",
+    "name": "Press and Awards Band",
+    "purpose": "Add credibility without reducing creative energy.",
+    "bestFor": ["brand site", "agency", "launch"],
+    "structure": ["press logos", "award snippets", "short metric"],
+    "compositionNotes": "Keep compact and typographic."
+  },
+  {
+    "id": "bold-final-cta",
+    "name": "Bold Final CTA",
+    "purpose": "End with a memorable, decisive action.",
+    "bestFor": ["campaign", "brand site"],
+    "structure": ["large statement", "CTA", "secondary link", "visual echo"],
+    "compositionNotes": "Echo the hero concept instead of introducing a new style."
+  }
+]

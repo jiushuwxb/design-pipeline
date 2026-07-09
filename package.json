@@ -1,0 +1,22 @@
+{
+  "name": "design-pipeline",
+  "version": "1.0.0",
+  "description": "AI驱动的设计系统自动化流水线 - PRD到代码全链路",
+  "type": "module",
+  "scripts": {
+    "pipeline": "tsx src/pipeline.ts",
+    "layer1": "tsx src/layers/01-prd-parser.ts",
+    "layer2": "tsx src/layers/02-stitch-generator.ts",
+    "layer3": "tsx src/layers/03-design-to-code.ts",
+    "layer4": "tsx src/layers/04-deploy-preview.ts",
+    "layer5": "tsx src/layers/05-design-review.ts",
+    "interactive": "tsx src/interactive.ts",
+    "doctor": "tsx src/doctor.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0",
+    "zod": "^3.24.0"
+  }
+}

@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VOLTAGE R-09 | Racing Hypercar</title>
+  <meta name="description" content="VOLTAGE R-09 racing hypercar launch site with GSAP scroll motion." />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;500;700;900&family=Barlow:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
+    :root {
+      --void: #07090b;
+      --carbon: #111416;
+      --graphite: #23282b;
+      --fog: #eef0eb;
+      --paper: #f7f7f2;
+      --ink: #131516;
+      --muted: #62696c;
+      --acid: #c8ff00;
+      --acid-ink: #111600;
+      --line-dark: rgba(255, 255, 255, .13);
+      --line-light: rgba(0, 0, 0, .1);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--paper); overflow-x: clip; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      font-family: Barlow, system-ui, sans-serif;
+      font-weight: 400;
+      background: var(--paper);
+      overflow-x: clip;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: .028;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    img, video { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea { font: inherit; }
+    button, a, input, textarea { outline-color: var(--acid); outline-offset: 3px; }
+
+    .nav {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 50;
+      height: 72px;
+      display: grid;
+      grid-template-columns: 170px 1fr 170px;
+      align-items: center;
+      padding: 0 clamp(18px, 3vw, 54px);
+      color: var(--ink);
+      mix-blend-mode: normal;
+      transition: background .35s var(--ease), color .35s var(--ease), border .35s var(--ease);
+    }
+
+    .nav.is-dark {
+      color: var(--fog);
+      background: rgba(7, 9, 11, .7);
+      border-bottom: 1px solid var(--line-dark);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: grid;
+      gap: 1px;
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 900;
+      letter-spacing: .18em;
+      line-height: .84;
+      text-transform: uppercase;
+    }
+    .brand small {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: .27em;
+      color: var(--muted);
+    }
+    .nav.is-dark .brand small { color: rgba(238, 240, 235, .7); }
+
+    .nav-links {
+      justify-self: center;
+      display: flex;
+      gap: clamp(18px, 3vw, 48px);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .reserve {
+      justify-self: end;
+      min-height: 44px;
+      padding: 0 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid rgba(0, 0, 0, .16);
+      background: var(--acid);
+      color: var(--acid-ink);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: transform .35s var(--ease);
+    }
+    .reserve:hover { transform: translateY(-2px); }
+
+    .hero {
+      min-height: 100dvh;
+      position: relative;
+      display: grid;
+      align-items: center;
+      padding: 90px clamp(20px, 5vw, 84px) 42px;
+      overflow: clip;
+      background: linear-gradient(180deg, #f8f8f4 0%, #e9ebe7 100%);
+    }
+
+    .hero-media {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .hero-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(247,247,242,.95) 0%, rgba(247,247,242,.72) 30%, rgba(247,247,242,.1) 54%, rgba(247,247,242,0) 78%),
+        radial-gradient(ellipse 74% 58% at 75% 58%, transparent 22%, rgba(247,247,242,.18) 100%);
+    }
+    .hero-media picture,
+    .hero-media img {
+      width: 100%;
+      height: 100%;
+    }
+    .hero-media picture { display: block; }
+    .hero-media img {
+      object-fit: cover;
+      object-position: 70% 52%;
+      filter: grayscale(.05) contrast(1.08) saturate(.9);
+      transform: scale(1.04);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      width: min(620px, 100%);
+      padding-top: 4vh;
+    }
+    .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      color: #516000;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .label::before {
+      content: "";
+      width: 56px;
+      height: 1px;
+      background: var(--acid);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Barlow Condensed", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: -.03em;
+      line-height: .86;
+      text-wrap: balance;
+    }
+    .hero h1 {
+      font-size: clamp(68px, 12vw, 178px);
+      font-weight: 900;
+      max-width: 760px;
+    }
+    .hero-copy {
+      width: min(460px, 100%);
+      margin: 22px 0 28px;
+      color: #343a3c;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 0 20px;
+      border: 1px solid var(--line-light);
+      border-radius: var(--radius-sm);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: transform .35s var(--ease), background .35s var(--ease), color .35s var(--ease);
+    }
+    .btn.primary {
+      background: var(--acid);
+      color: var(--acid-ink);
+      border-color: rgba(17, 22, 0, .16);
+    }
+    .btn.dark {
+      background: var(--void);
+      color: var(--fog);
+      border-color: var(--void);
+    }
+    .btn:hover { transform: translateY(-2px); }
+
+    .scroll-cue {
+      position: absolute;
+      z-index: 5;
+      left: clamp(20px, 5vw, 84px);
+      bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: #5c6500;
+      text-transform: uppercase;
+    }
+    .scroll-cue i {
+      display: block;
+      width: 74px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--acid), rgba(0,0,0,.15));
+      transform-origin: left;
+    }
+
+    .spec-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-block: 1px solid var(--line-light);
+      background: #f1f2ee;
+    }
+    .spec {
+      min-height: 116px;
+      display: grid;
+      place-items: center;
+      border-right: 1px solid var(--line-light);
+      text-align: center;
+    }
+    .spec:last-child { border-right: 0; }
+    .spec strong {
+      display: block;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: .9;
+      letter-spacing: -.03em;
+      font-weight: 300;
+    }
+    .spec span {
+      display: block;
+      margin-top: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section {
+      position: relative;
+      padding: clamp(78px, 10vw, 132px) clamp(20px, 5vw, 84px);
+    }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(220px, 380px) 1fr;
+      gap: clamp(28px, 5vw, 80px);
+      align-items: end;
+      margin-bottom: 34px;
+    }
+    .section-head h2 {
+      font-size: clamp(44px, 7vw, 104px);
+      font-weight: 500;
+    }
+    .section-head p {
+      max-width: 470px;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .model-wrap {
+      min-height: 100dvh;
+      overflow: hidden;
+      background: var(--paper);
+      perspective: 1400px;
+    }
+    .model-track {
+      display: flex;
+      gap: 14px;
+      width: max-content;
+      padding-right: clamp(20px, 5vw, 84px);
+      will-change: transform;
+    }
+    .model-card {
+      width: min(68vw, 620px);
+      min-width: 320px;
+      background: var(--void);
+      color: var(--fog);
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      transform-style: preserve-3d;
+      transform-origin: 50% 60%;
+      transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+      box-shadow: 0 24px 70px rgba(9, 11, 12, .18);
+    }
+    .model-card.tilt-3d::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      opacity: 0;
+      background:
+        radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.24), transparent 38%),
+        linear-gradient(135deg, rgba(200,255,0,.08), transparent 38%);
+      mix-blend-mode: screen;
+      transition: opacity .35s var(--ease);
+    }
+    .model-card.tilt-3d:hover {
+      box-shadow: 0 36px 100px rgba(9, 11, 12, .3);
+    }
+    .model-card.tilt-3d:hover::after { opacity: 1; }
+    .model-card figure {
+      height: clamp(300px, 42vw, 520px);
+      margin: 0;
+      overflow: hidden;
+      background: #151719;
+      transform: translateZ(22px);
+    }
+    .model-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(.12) contrast(1.08);
+      transition: transform 1s var(--ease), filter .6s var(--ease);
+    }
+    .model-card:hover img { transform: scale(1.045); filter: grayscale(0) contrast(1.1); }
+    .model-info {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      transform: translateZ(34px);
+    }
+    .model-info h3 {
+      font-size: clamp(32px, 4vw, 54px);
+      font-weight: 700;
+    }
+    .model-info p {
+      grid-column: 1 / -1;
+      margin: 4px 0 0;
+      color: rgba(238, 240, 235, .72);
+      line-height: 1.5;
+    }
+    .tag {
+      color: var(--acid);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .black-section {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: minmax(280px, 520px) 1fr;
+      gap: clamp(24px, 6vw, 90px);
+      align-items: center;
+      background: var(--void);
+      color: var(--fog);
+      overflow: hidden;
+    }
+    .black-section::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 75% 70% at 72% 50%, rgba(200,255,0,.11), transparent 38%, rgba(7,9,11,.9) 100%);
+    }
+    .black-section > * { position: relative; z-index: 3; }
+    .black-section h2 {
+      font-size: clamp(54px, 8vw, 124px);
+      font-weight: 500;
+    }
+    .black-section p {
+      margin: 20px 0 26px;
+      max-width: 480px;
+      color: rgba(238, 240, 235, .7);
+      line-height: 1.62;
+    }
+    .tech-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .tech-item {
+      padding-top: 18px;
+      border-top: 1px solid var(--line-dark);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: rgba(238, 240, 235, .72);
+    }
+    .tech-item strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--acid);
+      font-size: 15px;
+    }
+    .battery-visual {
+      min-height: 460px;
+      position: relative;
+      perspective: 1100px;
+    }
+    .battery {
+      position: absolute;
+      inset: 16% 2% 12% 4%;
+      transform: rotateX(58deg) rotateZ(-16deg);
+      transform-style: preserve-3d;
+      border: 1px solid rgba(238, 240, 235, .18);
+      background: linear-gradient(135deg, #1b2022, #090b0c);
+      box-shadow: 0 50px 120px rgba(0,0,0,.65);
+    }
+    .cell-grid {
+      position: absolute;
+      inset: 28px;
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 9px;
+    }
+    .cell {
+      min-height: 64px;
+      border: 1px solid rgba(238,240,235,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.02));
+      box-shadow: inset 0 0 22px rgba(0,0,0,.35);
+    }
+    .cell.hot {
+      background: linear-gradient(180deg, rgba(200,255,0,.62), rgba(200,255,0,.08));
+      box-shadow: 0 0 26px rgba(200,255,0,.25);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1.18fr .82fr;
+      align-items: stretch;
+      padding: 0;
+      min-height: 76dvh;
+      background: #eef0eb;
+    }
+    .split-media { overflow: hidden; }
+    .split-media img {
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+      object-fit: cover;
+      filter: grayscale(.15) contrast(1.05);
+    }
+    .split-copy {
+      display: grid;
+      align-content: center;
+      padding: clamp(42px, 7vw, 96px);
+    }
+    .split-copy h2 {
+      font-size: clamp(42px, 6vw, 88px);
+      font-weight: 500;
+    }
+    .split-copy p {
+      color: var(--muted);
+      line-height: 1.62;
+      max-width: 450px;
+    }
+
+    .logos {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 1px;
+      border-block: 1px solid var(--line-light);
+      background: var(--line-light);
+    }
+    .logos span {
+      min-height: 86px;
+      display: grid;
+      place-items: center;
+      background: #f2f3ef;
+      color: #6d7374;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      text-transform: uppercase;
+    }
+
+    .inquiry {
+      display: grid;
+      grid-template-columns: minmax(260px, 420px) 1fr;
+      gap: clamp(28px, 7vw, 96px);
+      align-items: start;
+      background: #f7f7f2;
+    }
+    .inquiry h2 {
+      font-size: clamp(44px, 6vw, 92px);
+      font-weight: 500;
+    }
+    .inquiry p {
+      color: var(--muted);
+      line-height: 1.62;
+    }
+    .form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    .form label {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+    .form input,
+    .form textarea {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid rgba(0,0,0,.25);
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink);
+      min-height: 42px;
+      padding: 4px 0 10px;
+    }
+    .form textarea {
+      grid-column: 1 / -1;
+      min-height: 82px;
+      resize: vertical;
+    }
+    .form .btn { justify-self: end; grid-column: 2; border-radius: 0; }
+
+    footer {
+      display: grid;
+      grid-template-columns: 190px 1fr 180px;
+      gap: 24px;
+      padding: 38px clamp(20px, 5vw, 84px);
+      border-top: 1px solid var(--line-light);
+      background: #eeefeb;
+      color: var(--muted);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px 30px;
+      justify-content: center;
+    }
+    .social { justify-self: end; display: flex; gap: 14px; }
+
+    .section-animate {
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+    .reveal, .split-line, .model-card, .spec, .tech-item { will-change: transform, opacity; }
+
+    @media (max-width: 980px) {
+      .nav { grid-template-columns: 1fr auto; }
+      .nav-links { display: none; }
+      .hero { padding-inline: 20px; }
+      .hero-media::after {
+        background: linear-gradient(180deg, rgba(247,247,242,.88) 0%, rgba(247,247,242,.56) 42%, rgba(247,247,242,.04) 100%);
+      }
+      .hero-media img { object-position: 66% 50%; }
+      .hero-content { padding-top: 16vh; }
+      .spec-strip { grid-template-columns: repeat(2, 1fr); }
+      .section-head, .black-section, .split, .inquiry, footer { grid-template-columns: 1fr; }
+      .black-section { min-height: auto; }
+      .battery-visual { min-height: 360px; }
+      .tech-list, .logos { grid-template-columns: repeat(2, 1fr); }
+      .form { grid-template-columns: 1fr; }
+      .form .btn { grid-column: 1; justify-self: stretch; }
+      .social { justify-self: start; }
+    }
+
+    @media (max-width: 560px) {
+      .reserve { padding: 0 12px; }
+      .hero h1 { font-size: clamp(58px, 19vw, 92px); }
+      .model-card { width: 86vw; }
+      .logos { grid-template-columns: 1fr 1fr; }
+      .tech-list { grid-template-columns: 1fr; }
+      .spec { min-height: 96px; }
+    }
+
+    @media (hover: none) {
+      .model-card.tilt-3d::after { display: none; }
+      .model-card figure,
+      .model-info { transform: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition: none !important; }
+      .model-track { transform: none !important; width: auto; flex-wrap: wrap; }
+      .model-card { width: 100%; transform: none !important; }
+      .section-animate { opacity: 1 !important; transform: none !important; }
+      .model-card figure,
+      .model-info { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary">
+    <a class="brand" href="#top" aria-label="Voltage home">
+      VOLTAGE
+      <small>Racing Division</small>
+    </a>
+    <div class="nav-links">
+      <a href="#models">Vehicles</a>
+      <a href="#aero">Technology</a>
+      <a href="#cockpit">Design</a>
+      <a href="#reserve">Reserve</a>
+    </div>
+    <a class="reserve" href="#reserve">Reserve <span aria-hidden="true">→</span></a>
+  </nav>
+
+  <main id="top">
+    <section class="hero" aria-label="Voltage R-09 launch hero">
+      <div class="hero-media" aria-hidden="true">
+        <picture>
+          <source media="(prefers-reduced-motion: no-preference)" srcset="assets/hero-motion.gif" type="image/gif" />
+          <img src="assets/hero-car-poster.jpg" alt="" />
+        </picture>
+      </div>
+      <div class="hero-content">
+        <div class="label">Track homologation concept</div>
+        <h1 class="hero-title">RACING<br />REFINED.</h1>
+        <p class="hero-copy reveal">
+          A carbon-bodied hypercar built for long straights, violent braking zones, and a cabin quiet enough to hear every command before the apex.
+        </p>
+        <div class="hero-actions reveal">
+          <a class="btn primary magnetic" href="#models">Discover R-09 <span aria-hidden="true">→</span></a>
+          <a class="btn magnetic" href="#aero">Watch aero story <span aria-hidden="true">▶</span></a>
+        </div>
+      </div>
+      <div class="scroll-cue" aria-hidden="true"><span>Scroll to launch</span><i></i></div>
+    </section>
+
+    <section class="spec-strip section-animate" aria-label="Concept performance figures">
+      <div class="spec"><div><strong data-count="1180">0</strong><span>Target ps output</span></div></div>
+      <div class="spec"><div><strong data-count="340">0</strong><span>km/h V-max</span></div></div>
+      <div class="spec"><div><strong data-count="860">0</strong><span>kg downforce</span></div></div>
+      <div class="spec"><div><strong data-count="2.4">0</strong><span>sec 0 to 100</span></div></div>
+    </section>
+
+    <section id="models" class="section model-wrap section-animate">
+      <div class="section-head">
+        <h2 class="split-line">Built to<br />hunt apexes.</h2>
+        <p class="reveal">Three expressions of one chassis. Each model changes the aero map, tire strategy, and cooling priority without diluting the R-09 silhouette.</p>
+      </div>
+      <div class="model-track">
+        <article class="model-card tilt-3d">
+          <figure>
+            <img src="https://images.unsplash.com/photo-1600712242805-5f78671b24da?auto=format&fit=crop&w=1200&q=82" alt="Silver racing supercar side profile in a low studio-like setting" loading="lazy" />
+          </figure>
+          <div class="model-info">
+            <h3>R-09 Pure</h3>
+            <span class="tag">Road attack</span>
+            <p>Carbon ceramic braking, passive aero balance, and a slimmer wing profile for fast-road precision.</p>
+          </div>
+        </article>
+        <article class="model-card tilt-3d">
+          <figure>
+            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=82" alt="White performance sports car photographed from the front quarter" loading="lazy" />
+          </figure>
+          <div class="model-info">
+            <h3>R-09 Circuit</h3>
+            <span class="tag">Track focus</span>
+            <p>Raised cooling doors, extended splitters, and software tuned for repeated high-load laps.</p>
+          </div>
+        </article>
+        <article class="model-card tilt-3d">
+          <figure>
+            <img src="https://images.unsplash.com/photo-1603386329225-868f9b1ee6c9?auto=format&fit=crop&w=1200&q=82" alt="Dark supercar detail with aggressive front bodywork" loading="lazy" />
+          </figure>
+          <div class="model-info">
+            <h3>R-09 Blackline</h3>
+            <span class="tag">Collector run</span>
+            <p>Exposed weave, acid center locks, and a darker cockpit trim for the twenty-five car launch series.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="aero" class="section black-section section-animate">
+      <div>
+        <div class="label">Voltage active aero</div>
+        <h2 class="split-line">Pressure.<br />Managed.</h2>
+        <p class="reveal">The underfloor, brake ducts, and rear plane work as one airflow system. At speed, the chassis compresses into the surface instead of floating above it.</p>
+        <a class="btn primary magnetic" href="#reserve">Request track brief <span aria-hidden="true">→</span></a>
+        <div class="tech-list">
+          <div class="tech-item"><strong>14 ms</strong>Flap response</div>
+          <div class="tech-item"><strong>4 zones</strong>Thermal routing</div>
+          <div class="tech-item"><strong>860 kg</strong>Concept downforce</div>
+        </div>
+      </div>
+      <div class="battery-visual" aria-label="Abstract carbon battery and aero module visualization">
+        <div class="battery">
+          <div class="cell-grid">
+            <span class="cell"></span><span class="cell hot"></span><span class="cell"></span><span class="cell"></span><span class="cell hot"></span><span class="cell"></span><span class="cell"></span><span class="cell hot"></span><span class="cell"></span>
+            <span class="cell"></span><span class="cell"></span><span class="cell hot"></span><span class="cell"></span><span class="cell"></span><span class="cell hot"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span>
+            <span class="cell hot"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell hot"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell hot"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cockpit" class="split section-animate">
+      <div class="split-media">
+        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=82" alt="Sports car cockpit and steering wheel in a performance interior" loading="lazy" />
+      </div>
+      <div class="split-copy">
+        <div class="label">Driver focused</div>
+        <h2 class="split-line">Zero noise.<br />Only signal.</h2>
+        <p class="reveal">The cockpit removes decoration and keeps the driver inside a clear operating loop: shift lights, tire state, brake temperature, and one physical control for each repeat action.</p>
+        <a class="btn magnetic" href="#reserve">Configure cockpit <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section class="logos section-animate" aria-label="Press references">
+      <span>TopGear</span>
+      <span>Road & Track</span>
+      <span>Autocar</span>
+      <span>Speedhunters</span>
+      <span>Forbes</span>
+      <span>Evo</span>
+    </section>
+
+    <section id="reserve" class="section inquiry section-animate">
+      <div>
+        <div class="label">Private allocation</div>
+        <h2 class="split-line">Own the run.</h2>
+        <p>R-09 production is limited to a numbered launch series. Submit an inquiry for build slot timing, track delivery, and motorsport support options.</p>
+      </div>
+      <form class="form" aria-label="Reservation inquiry form">
+        <label>First name <input name="first-name" autocomplete="given-name" /></label>
+        <label>Last name <input name="last-name" autocomplete="family-name" /></label>
+        <label>Email <input name="email" type="email" autocomplete="email" /></label>
+        <label>Phone <input name="phone" type="tel" autocomplete="tel" /></label>
+        <label>Preferences / message <textarea name="message"></textarea></label>
+        <button class="btn dark magnetic" type="button">Submit inquiry <span aria-hidden="true">→</span></button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="section-animate">
+    <a class="brand" href="#top">VOLTAGE<small>Racing Division</small></a>
+    <div class="footer-links">
+      <a href="#models">Vehicles</a>
+      <a href="#aero">Technology</a>
+      <a href="#cockpit">Design</a>
+      <a href="#reserve">Ownership</a>
+      <a href="assets/sources.md">Sources</a>
+    </div>
+    <div class="social" aria-label="Social links">
+      <a href="#">IG</a>
+      <a href="#">YT</a>
+      <a href="#">IN</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script>
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const nav = document.querySelector(".nav");
+
+    const onScroll = () => {
+      nav.classList.toggle("is-dark", window.scrollY > window.innerHeight * 1.05);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    function animateCounters() {
+      document.querySelectorAll("[data-count]").forEach((el) => {
+        const target = Number(el.dataset.count);
+        const decimals = String(el.dataset.count).includes(".") ? 1 : 0;
+        const obj = { value: 0 };
+        const render = () => {
+          el.textContent = decimals ? obj.value.toFixed(1) : Math.round(obj.value).toLocaleString("en-US");
+        };
+        if (!window.gsap || reduced) {
+          obj.value = target;
+          render();
+          return;
+        }
+        gsap.to(obj, {
+          value: target,
+          duration: 1.25,
+          ease: "power3.out",
+          onUpdate: render,
+          scrollTrigger: { trigger: el, start: "top 82%", once: true }
+        });
+      });
+    }
+
+    function splitText(selector) {
+      document.querySelectorAll(selector).forEach((el) => {
+        const text = el.innerHTML;
+        el.innerHTML = text
+          .split("<br>")
+          .map((line) => `<span class="line-mask"><span>${line}</span></span>`)
+          .join("<br>");
+      });
+    }
+
+    splitText(".hero-title, .split-line");
+
+    if (window.gsap && window.ScrollTrigger && !reduced) {
+      gsap.registerPlugin(ScrollTrigger);
+
+      gsap.set(".line-mask", { display: "inline-block", overflow: "hidden", verticalAlign: "top" });
+      gsap.set(".line-mask > span", { display: "inline-block" });
+      gsap.fromTo(".hero-title .line-mask > span",
+        { yPercent: 115, rotate: 4 },
+        { yPercent: 0, rotate: 0, duration: 1.05, ease: "power4.out", stagger: .08, delay: .12 }
+      );
+      gsap.from(".hero-copy, .hero-actions, .label", { opacity: 0, y: 28, duration: .75, delay: .55, ease: "power3.out", stagger: .08 });
+      gsap.to(".hero-media img", {
+        scale: 1.16,
+        yPercent: 8,
+        ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+      });
+      gsap.to(".scroll-cue i", {
+        scaleX: .18,
+        ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom 35%", scrub: true }
+      });
+
+      gsap.utils.toArray(".section-animate").forEach((section) => {
+        gsap.from(section, {
+          autoAlpha: 0,
+          y: 82,
+          rotateX: 5,
+          transformPerspective: 1200,
+          transformOrigin: "50% 100%",
+          duration: .95,
+          ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 84%", once: true }
+        });
+
+        const details = section.querySelectorAll(".spec, .section-head > *, .split-media, .split-copy > *, .logos span, .inquiry > div, .form > *");
+        if (details.length) {
+          gsap.from(details, {
+            autoAlpha: 0,
+            y: 34,
+            duration: .72,
+            ease: "power3.out",
+            stagger: .045,
+            scrollTrigger: { trigger: section, start: "top 76%", once: true }
+          });
+        }
+      });
+
+      gsap.utils.toArray(".reveal").forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          y: 34,
+          duration: .75,
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 84%", once: true }
+        });
+      });
+
+      gsap.utils.toArray(".split-line").forEach((el) => {
+        gsap.fromTo(el.querySelectorAll(".line-mask > span"),
+          { yPercent: 115, rotate: 3 },
+          {
+            yPercent: 0,
+            rotate: 0,
+            duration: .9,
+            ease: "power4.out",
+            stagger: .07,
+            scrollTrigger: { trigger: el, start: "top 82%", once: true }
+          }
+        );
+      });
+
+      const track = document.querySelector(".model-track");
+      const modelWrap = document.querySelector(".model-wrap");
+      const distance = () => Math.max(0, track.scrollWidth - window.innerWidth + parseFloat(getComputedStyle(modelWrap).paddingLeft));
+      gsap.to(track, {
+        x: () => -distance(),
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".model-wrap",
+          start: "top top",
+          end: () => `+=${distance() + window.innerHeight * .2}`,
+          pin: true,
+          scrub: 1,
+          invalidateOnRefresh: true
+        }
+      });
+
+      gsap.from(".model-card", {
+        opacity: 0,
+        y: 80,
+        scale: .96,
+        duration: .8,
+        ease: "power3.out",
+        stagger: .12,
+        scrollTrigger: { trigger: ".model-track", start: "top 82%", once: true }
+      });
+
+      gsap.to(".battery", {
+        rotateZ: -9,
+        rotateX: 52,
+        y: -24,
+        ease: "none",
+        scrollTrigger: { trigger: ".black-section", start: "top bottom", end: "bottom top", scrub: true }
+      });
+
+      gsap.from(".tech-item", {
+        opacity: 0,
+        y: 22,
+        duration: .65,
+        stagger: .08,
+        ease: "power3.out",
+        scrollTrigger: { trigger: ".tech-list", start: "top 82%", once: true }
+      });
+
+      document.querySelectorAll(".magnetic").forEach((btn) => {
+        const moveX = gsap.quickTo(btn, "x", { duration: .45, ease: "power3.out" });
+        const moveY = gsap.quickTo(btn, "y", { duration: .45, ease: "power3.out" });
+        btn.addEventListener("pointermove", (event) => {
+          const rect = btn.getBoundingClientRect();
+          moveX((event.clientX - rect.left - rect.width / 2) * .28);
+          moveY((event.clientY - rect.top - rect.height / 2) * .28);
+        });
+        btn.addEventListener("pointerleave", () => { moveX(0); moveY(0); });
+      });
+
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        document.querySelectorAll(".tilt-3d").forEach((card) => {
+          gsap.set(card, { transformPerspective: 1000, transformStyle: "preserve-3d" });
+          const rotateX = gsap.quickTo(card, "rotationX", { duration: .42, ease: "power3.out" });
+          const rotateY = gsap.quickTo(card, "rotationY", { duration: .42, ease: "power3.out" });
+          const lift = gsap.quickTo(card, "z", { duration: .42, ease: "power3.out" });
+
+          card.addEventListener("pointermove", (event) => {
+            const bounds = card.getBoundingClientRect();
+            const px = (event.clientX - bounds.left) / bounds.width - .5;
+            const py = (event.clientY - bounds.top) / bounds.height - .5;
+            rotateY(px * 10);
+            rotateX(py * -10);
+            lift(18);
+            card.style.setProperty("--gx", `${(px + .5) * 100}%`);
+            card.style.setProperty("--gy", `${(py + .5) * 100}%`);
+          });
+
+          card.addEventListener("pointerleave", () => {
+            rotateX(0);
+            rotateY(0);
+            lift(0);
+          });
+        });
+      }
+
+      window.addEventListener("load", () => ScrollTrigger.refresh());
+    }
+
+    animateCounters();
+  </script>
+</body>
+</html>

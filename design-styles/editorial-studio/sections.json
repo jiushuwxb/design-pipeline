@@ -1,0 +1,58 @@
+[
+  {
+    "id": "editorial-hero",
+    "name": "Editorial Hero",
+    "purpose": "Introduce a studio, premium service, or brand object with quiet confidence.",
+    "bestFor": ["studio", "architecture", "premium brand"],
+    "structure": ["minimal nav", "large editorial headline", "image", "caption", "short intro"],
+    "compositionNotes": "Use strong whitespace and avoid SaaS-style CTA pressure."
+  },
+  {
+    "id": "image-feature-spread",
+    "name": "Image Feature Spread",
+    "purpose": "Let one image or work sample carry the section.",
+    "bestFor": ["photography", "architecture", "design studio"],
+    "structure": ["large image", "caption", "metadata", "short text"],
+    "compositionNotes": "Use stable aspect ratios and magazine-like captions."
+  },
+  {
+    "id": "service-editorial-list",
+    "name": "Editorial Service List",
+    "purpose": "Present services without generic cards.",
+    "bestFor": ["studio", "agency", "consultancy"],
+    "structure": ["service rows", "index numbers", "description", "divider"],
+    "compositionNotes": "Use typography and dividers instead of boxed cards."
+  },
+  {
+    "id": "case-study-spread",
+    "name": "Case Study Spread",
+    "purpose": "Show a project through context, image, and outcome.",
+    "bestFor": ["portfolio", "studio"],
+    "structure": ["project visual", "project title", "brief", "result", "metadata"],
+    "compositionNotes": "Use one or two featured projects, not many small cards."
+  },
+  {
+    "id": "philosophy-statement",
+    "name": "Philosophy Statement",
+    "purpose": "Express point of view and taste.",
+    "bestFor": ["premium brand", "studio"],
+    "structure": ["large quote/statement", "supporting text", "signature/detail"],
+    "compositionNotes": "Keep copy short and deliberate."
+  },
+  {
+    "id": "press-client-list",
+    "name": "Press and Client List",
+    "purpose": "Add credibility through understated lists.",
+    "bestFor": ["studio", "premium service"],
+    "structure": ["client/press rows", "year", "project/category"],
+    "compositionNotes": "Use list rhythm and spacing, not logo clutter."
+  },
+  {
+    "id": "appointment-cta",
+    "name": "Appointment CTA",
+    "purpose": "Invite contact, inquiry, booking, or consultation.",
+    "bestFor": ["service site", "studio"],
+    "structure": ["short heading", "contact link", "location/availability"],
+    "compositionNotes": "Keep elegant and low-pressure."
+  }
+]

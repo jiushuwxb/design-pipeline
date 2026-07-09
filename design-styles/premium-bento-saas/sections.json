@@ -1,0 +1,106 @@
+[
+  {
+    "id": "hero-product-proof",
+    "name": "Hero with Product Proof",
+    "purpose": "Establish the product/category, value proposition, CTA, and product credibility in the first viewport.",
+    "bestFor": ["SaaS landing", "AI product", "B2B product"],
+    "structure": ["nav", "headline", "supporting copy", "CTA row", "product UI preview", "proof metrics"],
+    "compositionNotes": "Use when the PRD has a clear product. Keep a hint of the next section visible."
+  },
+  {
+    "id": "bento-feature-grid",
+    "name": "Bento Feature Grid",
+    "purpose": "Present 4-7 core capabilities through mixed-size cards.",
+    "bestFor": ["feature showcase", "AI product", "platform overview"],
+    "structure": ["section heading", "large primary feature cell", "secondary feature cells", "micro visuals", "metric chips"],
+    "compositionNotes": "Use one dominant cell and avoid equal-card monotony."
+  },
+  {
+    "id": "workflow-steps",
+    "name": "Workflow Steps",
+    "purpose": "Show how users move from input to outcome.",
+    "bestFor": ["automation", "AI workflow", "developer tool"],
+    "structure": ["intro", "3-5 step sequence", "connector lines", "result panel"],
+    "compositionNotes": "Use after hero or feature grid when the product needs process clarity."
+  },
+  {
+    "id": "product-screenshot-stage",
+    "name": "Product Screenshot Stage",
+    "purpose": "Make the actual product UI the visual centerpiece.",
+    "bestFor": ["SaaS landing", "dashboard product", "developer product"],
+    "structure": ["headline", "browser/device frame", "annotation pins", "supporting bullets"],
+    "compositionNotes": "Use realistic UI details; do not use blurred atmospheric placeholders."
+  },
+  {
+    "id": "logo-cloud-proof",
+    "name": "Logo Cloud Proof",
+    "purpose": "Add trust signals through customer, partner, or integration logos.",
+    "bestFor": ["B2B SaaS", "agency site", "platform page"],
+    "structure": ["small headline", "logo row/grid", "optional trust metric"],
+    "compositionNotes": "Keep compact; avoid making logos the page focus."
+  },
+  {
+    "id": "metric-strip",
+    "name": "Metric Strip",
+    "purpose": "Show quantified proof such as speed, cost, conversion, uptime, or usage.",
+    "bestFor": ["SaaS", "AI product", "operations product"],
+    "structure": ["3-4 metrics", "labels", "short context"],
+    "compositionNotes": "Place after proof/product sections; values should feel plausible."
+  },
+  {
+    "id": "integration-wall",
+    "name": "Integration Wall",
+    "purpose": "Show ecosystem breadth through integrations or connected tools.",
+    "bestFor": ["platform", "developer tool", "automation product"],
+    "structure": ["section heading", "integration cards", "category labels", "connector visual"],
+    "compositionNotes": "Use when PRD mentions tools, APIs, or ecosystem."
+  },
+  {
+    "id": "comparison-table",
+    "name": "Comparison Table",
+    "purpose": "Differentiate from legacy workflow or competitors.",
+    "bestFor": ["conversion page", "SaaS landing", "B2B purchase decision"],
+    "structure": ["problem statement", "comparison columns", "highlighted advantages"],
+    "compositionNotes": "Keep claims specific and scannable."
+  },
+  {
+    "id": "testimonial-wall",
+    "name": "Testimonial Wall",
+    "purpose": "Add social proof through user quotes or review cards.",
+    "bestFor": ["landing page", "service page", "product launch"],
+    "structure": ["section title", "quote cards", "avatar/company metadata"],
+    "compositionNotes": "Use varied card sizes; avoid too many long quotes."
+  },
+  {
+    "id": "pricing-table",
+    "name": "Pricing Table",
+    "purpose": "Present plans and conversion path.",
+    "bestFor": ["SaaS", "subscription product", "tooling"],
+    "structure": ["pricing toggle", "3 plan columns", "feature lists", "recommended state"],
+    "compositionNotes": "Use only if PRD implies plans/pricing."
+  },
+  {
+    "id": "security-compliance-band",
+    "name": "Security and Compliance Band",
+    "purpose": "Handle trust objections for B2B products.",
+    "bestFor": ["enterprise SaaS", "AI product", "data platform"],
+    "structure": ["trust heading", "security badges", "policy cards", "audit metric"],
+    "compositionNotes": "Keep restrained and credible."
+  },
+  {
+    "id": "faq-accordion",
+    "name": "FAQ Accordion",
+    "purpose": "Resolve final objections before CTA.",
+    "bestFor": ["landing page", "pricing page", "launch page"],
+    "structure": ["FAQ heading", "accordion list", "contact fallback"],
+    "compositionNotes": "Place near bottom before final CTA."
+  },
+  {
+    "id": "final-cta-band",
+    "name": "Final CTA Band",
+    "purpose": "Close with one clear action.",
+    "bestFor": ["all marketing pages"],
+    "structure": ["short headline", "supporting copy", "primary CTA", "secondary CTA"],
+    "compositionNotes": "Avoid adding new concepts; summarize the page promise."
+  }
+]

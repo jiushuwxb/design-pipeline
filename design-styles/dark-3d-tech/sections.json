@@ -1,0 +1,66 @@
+[
+  {
+    "id": "dark-platform-hero",
+    "name": "Dark Platform Hero",
+    "purpose": "Introduce a technical platform with product proof and depth.",
+    "bestFor": ["AI platform", "data infrastructure", "cyber product"],
+    "structure": ["nav", "headline", "technical value prop", "CTA", "3D/data visual", "status chips"],
+    "compositionNotes": "Use actual product/data signals, not generic sci-fi decoration."
+  },
+  {
+    "id": "architecture-diagram",
+    "name": "Architecture Diagram",
+    "purpose": "Explain how systems connect.",
+    "bestFor": ["infrastructure", "developer platform", "AI pipeline"],
+    "structure": ["nodes", "connections", "layers", "caption", "status indicators"],
+    "compositionNotes": "Use when PRD includes APIs, pipelines, models, or data flow."
+  },
+  {
+    "id": "live-metrics-console",
+    "name": "Live Metrics Console",
+    "purpose": "Show operational credibility through live-looking metrics.",
+    "bestFor": ["monitoring", "AI ops", "data product"],
+    "structure": ["metric row", "chart panels", "log feed", "health states"],
+    "compositionNotes": "Use plausible values and semantic status colors."
+  },
+  {
+    "id": "capability-orbit",
+    "name": "Capability Orbit",
+    "purpose": "Visualize connected capabilities around a core platform.",
+    "bestFor": ["platform overview", "AI product"],
+    "structure": ["central core", "capability nodes", "short labels", "connector lines"],
+    "compositionNotes": "Keep labels readable; avoid random decorative nodes."
+  },
+  {
+    "id": "security-trust-grid",
+    "name": "Security Trust Grid",
+    "purpose": "Handle trust, compliance, and resilience claims.",
+    "bestFor": ["enterprise AI", "cyber", "data platform"],
+    "structure": ["trust heading", "security cards", "compliance badges", "uptime metric"],
+    "compositionNotes": "Use restrained visuals and strong contrast."
+  },
+  {
+    "id": "developer-code-demo",
+    "name": "Developer Code Demo",
+    "purpose": "Show developer experience with code and result preview.",
+    "bestFor": ["API product", "SDK", "developer tool"],
+    "structure": ["code panel", "response/result panel", "copy button", "language tabs"],
+    "compositionNotes": "Use monospaced code and realistic snippets."
+  },
+  {
+    "id": "use-case-cards",
+    "name": "Technical Use Case Cards",
+    "purpose": "Translate platform capability into concrete use cases.",
+    "bestFor": ["AI platform", "data product"],
+    "structure": ["card grid", "icon", "problem", "outcome", "metric"],
+    "compositionNotes": "Use after technical architecture or hero."
+  },
+  {
+    "id": "technical-final-cta",
+    "name": "Technical Final CTA",
+    "purpose": "Close with demo, docs, trial, or contact action.",
+    "bestFor": ["developer platform", "AI product"],
+    "structure": ["short headline", "docs/demo CTA", "trust footnote"],
+    "compositionNotes": "Offer docs or sandbox as secondary action."
+  }
+]

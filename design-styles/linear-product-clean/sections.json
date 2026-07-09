@@ -1,0 +1,50 @@
+[
+  {
+    "id": "product-command-hero",
+    "name": "Product Command Hero",
+    "purpose": "Introduce a productivity/developer product with a command or product panel.",
+    "bestFor": ["developer tool", "productivity app", "B2B product"],
+    "structure": ["nav", "headline", "CTA", "command panel", "status strip"],
+    "compositionNotes": "Show product state and keyboard-like efficiency."
+  },
+  {
+    "id": "issue-list-proof",
+    "name": "Issue/List Product Proof",
+    "purpose": "Use task, issue, event, or workflow rows as product proof.",
+    "bestFor": ["project management", "ops tool", "developer product"],
+    "structure": ["list/table panel", "filters", "status chips", "row actions"],
+    "compositionNotes": "Keep density high but readable."
+  },
+  {
+    "id": "feature-detail-rows",
+    "name": "Feature Detail Rows",
+    "purpose": "Explain capabilities with product detail panels.",
+    "bestFor": ["B2B SaaS", "developer tool"],
+    "structure": ["feature title", "description", "UI detail", "shortcut/status"],
+    "compositionNotes": "Use clear row rhythm instead of big marketing cards."
+  },
+  {
+    "id": "roadmap-timeline",
+    "name": "Roadmap Timeline",
+    "purpose": "Show product planning, progress, or release structure.",
+    "bestFor": ["planning tool", "project software"],
+    "structure": ["timeline", "milestones", "owners", "progress states"],
+    "compositionNotes": "Use when PRD mentions planning, tasks, releases, or lifecycle."
+  },
+  {
+    "id": "integration-command-grid",
+    "name": "Integration Command Grid",
+    "purpose": "Show connected tools and efficient actions.",
+    "bestFor": ["developer workflow", "automation"],
+    "structure": ["integration rows", "command chips", "connection lines"],
+    "compositionNotes": "Keep visuals technical and calm."
+  },
+  {
+    "id": "focused-final-cta",
+    "name": "Focused Final CTA",
+    "purpose": "End with trial/docs/demo without visual noise.",
+    "bestFor": ["developer/B2B products"],
+    "structure": ["short headline", "CTA pair", "small trust text"],
+    "compositionNotes": "Use restrained surface treatment."
+  }
+]
