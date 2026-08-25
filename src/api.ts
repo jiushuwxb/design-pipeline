@@ -4,6 +4,7 @@
  */
 
 import { config } from "./config.js";
+import type { z } from "zod";
 
 interface CallAIOptions {
   system: string;
@@ -15,6 +16,12 @@ interface CallAIOptions {
 interface AIResponse {
   content: string;
   json?: any;
+}
+
+interface CallAIJsonOptions<S extends z.ZodTypeAny> extends Omit<CallAIOptions, "extractJson"> {
+  schema: S;
+  schemaName: string;
+  retries?: number;
 }
 
 export async function callAI(options: CallAIOptions): Promise<AIResponse> {
@@ -90,9 +97,44 @@ export async function callAI(options: CallAIOptions): Promise<AIResponse> {
 }
 
 /**
+ * Call the model and validate its JSON at the trust boundary. Invalid model
+ * output is sent back once (configurable) with concise validation errors.
+ */
+export async function callAIJson<S extends z.ZodTypeAny>(options: CallAIJsonOptions<S>): Promise<z.output<S>> {
+  const { schema, schemaName, retries = 1, ...callOptions } = options;
+  let prompt = callOptions.prompt;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const result = await callAI({ ...callOptions, prompt, extractJson: false });
+    let candidate: unknown;
+    try {
+      candidate = extractJSON(result.content);
+    } catch (error) {
+      lastError = error;
+      prompt = `${callOptions.prompt}\n\nYour previous response did not contain parseable JSON for ${schemaName}.\nError: ${String(error).slice(0, 1000)}\n\nReturn a corrected, complete JSON object only. Previous output:\n${result.content.slice(0, 12000)}`;
+      continue;
+    }
+
+    const parsed = schema.safeParse(candidate);
+    if (parsed.success) return parsed.data;
+
+    lastError = parsed.error;
+    const issues = parsed.error.issues
+      .slice(0, 12)
+      .map((issue) => `${issue.path.join(".") || "root"}: ${issue.message}`)
+      .join("\n");
+
+    prompt = `${callOptions.prompt}\n\nYour previous JSON was invalid for ${schemaName}.\nValidation errors:\n${issues}\n\nReturn a corrected, complete JSON object only. Previous output:\n${result.content.slice(0, 12000)}`;
+  }
+
+  throw new Error(`AI returned invalid ${schemaName} after ${retries + 1} attempt(s): ${String(lastError)}`);
+}
+
+/**
  * 从混合了思考过程和 JSON 的文本中提取有效的 JSON 对象
  */
-function extractJSON(text: string): any {
+export function extractJSON(text: string): any {
   // 策略 1：找到第一个 { 和最后一个 }，尝试解析
   const firstBrace = text.indexOf("{");
   const lastBrace = text.lastIndexOf("}");

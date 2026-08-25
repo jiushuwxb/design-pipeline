@@ -14,7 +14,13 @@ import { createInterface } from "readline";
 import { resolve } from "path";
 import { mkdirSync, writeFileSync } from "fs";
 import { config } from "./config.js";
-import type { PipelineState } from "./types.js";
+import {
+  BackendFramework,
+  PipelineMode,
+  PreviewFramework,
+  type PipelineState,
+  type ReviewReport,
+} from "./types.js";
 
 async function runLayer1(prdPath: string) {
   const { parsePRD } = await import("./layers/01-prd-parser.js");
@@ -26,9 +32,9 @@ async function runLayer2(briefPath: string) {
   return generateStitchPrompts(briefPath);
 }
 
-async function runLayer3(briefPath: string) {
+async function runLayer3(briefPath: string, iterationFeedback?: string) {
   const { designToCode } = await import("./layers/03-design-to-code.js");
-  return designToCode(briefPath);
+  return designToCode(briefPath, { iterationFeedback });
 }
 
 async function runLayer4(briefPath: string) {
@@ -54,6 +60,7 @@ Options:
   --framework <fw>    preview framework: react | vue | html
   --style <preset>    preview design style preset
   --backend <fw>      development backend: express | fastify | koa
+  --require-stitch    stop preview generation unless validated Stitch results exist
   --deploy            deploy to Vercel after the review passes
 
 Examples:
@@ -117,7 +124,8 @@ Examples:
   const previousDeployFlag = process.env.DEPLOY_TO_VERCEL;
   process.env.DEPLOY_TO_VERCEL = "false";
   config.deploy.enabled = false;
-  await runLayer4(briefPath);
+  const previewResult = await runLayer4(briefPath);
+  state.buildVerification = previewResult.buildVerification;
   process.env.DEPLOY_TO_VERCEL = previousDeployFlag;
   config.deploy.enabled = previousDeployFlag === "true";
   saveState(state);
@@ -137,11 +145,12 @@ Examples:
     console.log(`Iteration guide saved: ${iterPath}`);
 
     state.currentLayer = 3;
-    state.codeOutputs = await runLayer3(briefPath);
+    state.codeOutputs = await runLayer3(briefPath, iterationGuide);
 
     state.currentLayer = 4;
     config.deploy.enabled = false;
-    await runLayer4(briefPath);
+    const iterationPreview = await runLayer4(briefPath);
+    state.buildVerification = iterationPreview.buildVerification;
 
     state.currentLayer = 5;
     reviewResult = await runLayer5(briefPath);
@@ -169,25 +178,37 @@ function applyCliArgs() {
   const cliBackend = parseArg("--backend");
 
   if (cliMode) {
-    process.env.PIPELINE_MODE = cliMode;
-    config.pipeline.mode = cliMode as any;
+    const parsed = PipelineMode.safeParse(cliMode);
+    if (!parsed.success) throw new Error(`Invalid --mode '${cliMode}'. Expected preview or development.`);
+    process.env.PIPELINE_MODE = parsed.data;
+    config.pipeline.mode = parsed.data;
   }
   if (cliFramework) {
-    process.env.PREVIEW_FRAMEWORK = cliFramework;
-    config.pipeline.preview.framework = cliFramework as any;
-    config.pipeline.development.frontendFramework = cliFramework as any;
+    const parsed = PreviewFramework.safeParse(cliFramework);
+    if (!parsed.success) throw new Error(`Invalid --framework '${cliFramework}'. Expected react, vue, or html.`);
+    if (config.pipeline.mode === "development" && parsed.data === "html") {
+      throw new Error("Development mode supports only react or vue frontends.");
+    }
+    process.env.PREVIEW_FRAMEWORK = parsed.data;
+    config.pipeline.preview.framework = parsed.data;
+    if (parsed.data !== "html") config.pipeline.development.frontendFramework = parsed.data;
   }
   if (cliStyle) {
     process.env.DESIGN_STYLE_PRESET = cliStyle;
     config.pipeline.preview.stylePreset = cliStyle;
   }
   if (cliBackend) {
-    process.env.DEV_BACKEND_FRAMEWORK = cliBackend;
-    config.pipeline.development.backendFramework = cliBackend as any;
+    const parsed = BackendFramework.safeParse(cliBackend);
+    if (!parsed.success) throw new Error(`Invalid --backend '${cliBackend}'. Expected express, fastify, or koa.`);
+    process.env.DEV_BACKEND_FRAMEWORK = parsed.data;
+    config.pipeline.development.backendFramework = parsed.data;
   }
   if (process.argv.includes("--deploy")) {
     process.env.DEPLOY_TO_VERCEL = "true";
     config.deploy.enabled = true;
+  }
+  if (process.argv.includes("--require-stitch")) {
+    process.env.REQUIRE_STITCH_RESULTS = "true";
   }
 }
 
@@ -224,12 +245,12 @@ function saveState(state: PipelineState) {
   writeFileSync(statePath, JSON.stringify(state, null, 2), "utf-8");
 }
 
-function generateIterationGuide(report: any): string {
+function generateIterationGuide(report: ReviewReport): string {
   const criticalIssues = report.issues.filter(
-    (i: any) => i.severity === "critical" || i.severity === "major"
+    (i) => i.severity === "critical" || i.severity === "major"
   );
   const minorIssues = report.issues.filter(
-    (i: any) => i.severity === "minor" || i.severity === "suggestion"
+    (i) => i.severity === "minor" || i.severity === "suggestion"
   );
 
   return `# Iteration Improvement Guide
@@ -237,10 +258,10 @@ function generateIterationGuide(report: any): string {
 Review score: ${report.overallScore}/100
 
 ## Must fix
-${criticalIssues.map((i: any) => `- [${i.category}] ${i.description}\n  Suggestion: ${i.suggestion}`).join("\n")}
+${criticalIssues.map((i) => `- [${i.category}] ${i.description}\n  Suggestion: ${i.suggestion}`).join("\n")}
 
 ## Suggested improvements
-${minorIssues.map((i: any) => `- [${i.category}] ${i.description}\n  Suggestion: ${i.suggestion}`).join("\n")}
+${minorIssues.map((i) => `- [${i.category}] ${i.description}\n  Suggestion: ${i.suggestion}`).join("\n")}
 `;
 }
 

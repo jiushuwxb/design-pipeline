@@ -6,19 +6,26 @@
  *   development: 可交付代码，生成完整前端+后端项目结构，开发可直接集成
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { config } from "../config.js";
 import { callAI } from "../api.js";
 import { formatDesignStyleForPrompt, loadDesignStyle } from "../design-styles.js";
 import { renderTemplate, renderConfigFile, briefToTemplateVars } from "../template-engine.js";
-import type {
-  DesignBrief,
+import { resolveGsapSkillProfile, writeGsapSkillManifest, type GsapSkillProfile } from "../gsap-skills.js";
+import {
+  DesignBrief as DesignBriefSchema,
+  DesignOutput,
+  type DesignBrief,
   CodeOutput,
   BackendCodeOutput,
   DevProjectOutput,
   ComponentSpec,
 } from "../types.js";
+
+export interface DesignToCodeOptions {
+  iterationFeedback?: string;
+}
 
 // ========== System Prompts ==========
 
@@ -30,8 +37,8 @@ const VUE_SYSTEM = `你是资深 Vue 前端工程师。生成高质量 Vue 3 + T
 技术栈：Vue 3 Composition API、<script setup lang="ts">、完整 Props/Emits 类型、处理所有状态。
 直接输出 .vue SFC 文件代码（用 \`\`\`vue 包裹，包含 template/script/style 三部分）。`;
 
-const HTML_SYSTEM = `你是资深 UI 工程师。生成高质量、自包含的 HTML 页面代码。
-技术栈：纯 HTML5 + CSS3（内嵌 <style>） + Vanilla JS（内嵌 <script>），无外部依赖。
+const HTML_SYSTEM = `你是资深 UI 工程师。生成高质量、可直接预览的 HTML 页面代码。
+技术栈：HTML5 + CSS3（内嵌 <style>） + Vanilla JS（内嵌 <script>）+ GSAP 3.15；仅 GSAP 可通过 jsDelivr CDN 加载。
 要求：深色科技风、可交互、所有状态（加载/空/错误）具备。直接输出完整 .html 文件（用 \`\`\`html 包裹）。`;
 
 const DEV_SYSTEM = `你是资深全栈工程师。生成可直接交付开发的完整项目代码。
@@ -86,7 +93,8 @@ async function generatePreviewComponent(
   component: ComponentSpec,
   brief: DesignBrief,
   framework: string,
-  designStylePrompt = ""
+  designStylePrompt = "",
+  implementationContext = ""
 ): Promise<{ componentName: string; code: string; language: string }> {
   const prompt = `为以下组件生成完整 ${framework.toUpperCase()} 代码：
 
@@ -103,6 +111,8 @@ ${framework === "html" ? "生成一个可直接在浏览器打开的 HTML 文件
     prompt: `${prompt}
 
 ${designStylePrompt}
+
+${implementationContext}
 
 Additional preview implementation requirements:
 - Build as part of a coherent section-based page composition. Use the Section Library modules that best fit this component/page.
@@ -134,7 +144,9 @@ Additional preview implementation requirements:
 // ========== 开发模式：完整项目生成 ==========
 
 async function generateDevFrontendProject(
-  brief: DesignBrief
+  brief: DesignBrief,
+  iterationFeedback = "",
+  gsapProfile?: GsapSkillProfile
 ): Promise<CodeOutput[]> {
   const outputs: CodeOutput[] = [];
   const framework = config.pipeline.development.frontendFramework;
@@ -334,7 +346,7 @@ async function generateDevFrontendProject(
     console.log(`    [${count}/${total}] ${comp.name} (${comp.pageName})`);
 
     try {
-      const result = await generateDevComponent(comp, brief, framework);
+      const result = await generateDevComponent(comp, brief, framework, iterationFeedback, gsapProfile?.prompt || "");
       const pageDir = resolve(srcDir, "components", comp.pageName.replace(/[^a-zA-Z0-9一-龥]/g, "_"));
       mkdirSync(pageDir, { recursive: true });
       const fname = `${result.componentName}.${getFileExt(framework).slice(1)}`;
@@ -387,8 +399,8 @@ async function generateDevFrontendProject(
 
   // --- package.json ---
   const pkg = framework === "vue"
-    ? { name: brief.project, version: "0.1.0", type: "module", scripts: { dev: "vite", build: "vue-tsc && vite build", preview: "vite preview" }, dependencies: { vue: "^3.5.0", "vue-router": "^4.4.0" }, devDependencies: { "@vitejs/plugin-vue": "^5.2.0", typescript: "~5.7.0", vite: "^6.0.0", "vue-tsc": "^2.2.0", tailwindcss: "^3.4.0", postcss: "^8.4.0", autoprefixer: "^10.4.0" } }
-    : { name: brief.project, version: "0.1.0", type: "module", scripts: { dev: "vite", build: "tsc && vite build", preview: "vite preview" }, dependencies: { react: "^18.3.1", "react-dom": "^18.3.1", "react-router-dom": "^6.28.0" }, devDependencies: { "@types/react": "^18.3.0", "@types/react-dom": "^18.3.0", "@vitejs/plugin-react": "^4.3.0", typescript: "~5.7.0", vite: "^6.0.0", tailwindcss: "^3.4.0", postcss: "^8.4.0", autoprefixer: "^10.4.0" } };
+    ? { name: brief.project, version: "0.1.0", type: "module", scripts: { dev: "vite", build: "vue-tsc && vite build", preview: "vite preview" }, dependencies: { vue: "^3.5.0", "vue-router": "^4.4.0", gsap: "^3.15.0" }, devDependencies: { "@vitejs/plugin-vue": "^5.2.0", typescript: "~5.7.0", vite: "^6.0.0", "vue-tsc": "^2.2.0", tailwindcss: "^3.4.0", postcss: "^8.4.0", autoprefixer: "^10.4.0" } }
+    : { name: brief.project, version: "0.1.0", type: "module", scripts: { dev: "vite", build: "tsc && vite build", preview: "vite preview" }, dependencies: { react: "^18.3.1", "react-dom": "^18.3.1", "react-router-dom": "^6.28.0", gsap: "^3.15.0", "@gsap/react": "^2.1.2" }, devDependencies: { "@types/react": "^18.3.0", "@types/react-dom": "^18.3.0", "@vitejs/plugin-react": "^4.3.0", typescript: "~5.7.0", vite: "^6.0.0", tailwindcss: "^3.4.0", postcss: "^8.4.0", autoprefixer: "^10.4.0" } };
 
   writeFileSync(resolve(baseDir, "package.json"), JSON.stringify(pkg, null, 2), "utf-8");
 
@@ -399,7 +411,9 @@ async function generateDevFrontendProject(
 async function generateDevComponent(
   comp: ComponentSpec & { pageName: string },
   brief: DesignBrief,
-  framework: string
+  framework: string,
+  iterationFeedback = "",
+  gsapSkillPrompt = ""
 ): Promise<{ componentName: string; code: string }> {
   const prompt = `生成符合团队规范的 ${framework.toUpperCase()} 组件代码：
 
@@ -412,7 +426,11 @@ ${comp.apiEndpoint ? `API 端点：${comp.apiEndpoint}` : ""}
 ${comp.dataModel ? `数据模型：${comp.dataModel}` : ""}
 
 规范：${config.codeStandards.componentNaming}命名、${config.codeStandards.cssApproach}样式、${config.codeStandards.typescript ? "TypeScript严格模式" : "JavaScript"}
-要求：完整 Props 类型、错误处理、所有状态覆盖、可访问性（aria-label）、性能优化（React.memo 或 computed）。`;
+要求：完整 Props 类型、错误处理、所有状态覆盖、可访问性（aria-label）、性能优化（React.memo 或 computed）。
+
+${iterationFeedback ? `上一轮评审修复要求（必须逐条落实）：\n${iterationFeedback}` : ""}
+
+${gsapSkillPrompt}`;
 
   const result = await callAI({
     system: DEV_SYSTEM,
@@ -746,22 +764,48 @@ prisma/
 
 // ========== 主入口 ==========
 
-export async function designToCode(briefPath: string): Promise<CodeOutput[]> {
+function loadStitchDesignReferences(projectDir: string): string {
+  const resultPath = resolve(projectDir, "stitch-prompts", "stitch-results.json");
+  if (!existsSync(resultPath)) {
+    if (process.env.REQUIRE_STITCH_RESULTS === "true") {
+      throw new Error(`Stitch results are required but missing: ${resultPath}`);
+    }
+    console.log("Stitch result: not supplied; generating from PRD + style preset only.");
+    return "## Design source status\nNo Stitch draft was supplied. Do not claim pixel fidelity to a Stitch design.";
+  }
+
+  const parsed = DesignOutput.array().safeParse(JSON.parse(readFileSync(resultPath, "utf-8")));
+  if (!parsed.success) {
+    throw new Error(`Invalid Stitch result file ${resultPath}: ${parsed.error.message}`);
+  }
+
+  const generated = parsed.data.filter((result) => result.status === "generated");
+  console.log(`Stitch result: ${generated.length}/${parsed.data.length} generated page draft(s) supplied.`);
+  return `## Stitch design references\n${generated.map((result) => [
+    `- Page: ${result.pageName}`,
+    result.stitchUrl ? `  Stitch URL: ${result.stitchUrl}` : "",
+    result.screenshot ? `  Screenshot: ${result.screenshot}` : "",
+  ].filter(Boolean).join("\n")).join("\n")}\nImplement these references faithfully where available.`;
+}
+
+export async function designToCode(briefPath: string, options: DesignToCodeOptions = {}): Promise<CodeOutput[]> {
   const mode = config.pipeline.mode;
-  const brief: DesignBrief = JSON.parse(readFileSync(briefPath, "utf-8"));
+  const brief = DesignBriefSchema.parse(JSON.parse(readFileSync(briefPath, "utf-8")));
   const projectDir = resolve(config.paths.output, brief.project);
 
   if (mode === "development") {
-    return designToCodeDev(brief, projectDir);
+    return designToCodeDev(brief, projectDir, options.iterationFeedback);
   }
-  return designToCodePreview(brief, projectDir);
+  return designToCodePreview(brief, projectDir, options.iterationFeedback);
 }
 
 /** 预览模式 */
-async function designToCodePreview(brief: DesignBrief, projectDir: string): Promise<CodeOutput[]> {
+async function designToCodePreview(brief: DesignBrief, projectDir: string, iterationFeedback = ""): Promise<CodeOutput[]> {
   const framework = config.pipeline.preview.framework;
   const style = loadDesignStyle(config.pipeline.preview.stylePreset);
   const designStylePrompt = formatDesignStyleForPrompt(style);
+  const gsapProfile = resolveGsapSkillProfile(style.id, style.styleMarkdown, framework);
+  writeGsapSkillManifest(projectDir, gsapProfile);
   console.log("═══════════════════════════════════════");
   console.log(`  第 3 层：设计 → 代码 (预览模式 · ${framework.toUpperCase()})`);
   console.log("═══════════════════════════════════════\n");
@@ -769,6 +813,14 @@ async function designToCodePreview(brief: DesignBrief, projectDir: string): Prom
   const codeDir = resolve(projectDir, "generated-code", "src", "components");
   mkdirSync(codeDir, { recursive: true });
   console.log(`Design style preset: ${style.name} (${style.id})`);
+  const designReferences = loadStitchDesignReferences(projectDir);
+  const implementationContext = [
+    designReferences,
+    iterationFeedback ? `## Mandatory iteration fixes\n${iterationFeedback}` : "",
+    gsapProfile.prompt,
+  ].filter(Boolean).join("\n\n");
+  if (iterationFeedback) console.log("Applying previous review feedback to every generated component.");
+  console.log(`GSAP skills: ${gsapProfile.skillIds.join(", ")}`);
 
   const allComponents = [
     ...brief.pages.flatMap((p) => p.components.map((c) => ({ ...c, pageName: p.name }))),
@@ -786,7 +838,7 @@ async function designToCodePreview(brief: DesignBrief, projectDir: string): Prom
     process.stdout.write(`  [${count}/${total}] ${comp.name}... `);
 
     try {
-      const result = await generatePreviewComponent(comp.pageName, comp, brief, framework, designStylePrompt);
+      const result = await generatePreviewComponent(comp.pageName, comp, brief, framework, designStylePrompt, implementationContext);
       const pageDir = resolve(codeDir, comp.pageName.replace(/[^a-zA-Z0-9一-龥]/g, "_"));
       mkdirSync(pageDir, { recursive: true });
       const fname = `${result.componentName}${getFileExt(framework)}`;
@@ -833,9 +885,13 @@ async function designToCodePreview(brief: DesignBrief, projectDir: string): Prom
 }
 
 /** 开发模式 */
-async function designToCodeDev(brief: DesignBrief, projectDir: string): Promise<CodeOutput[]> {
+async function designToCodeDev(brief: DesignBrief, projectDir: string, iterationFeedback = ""): Promise<CodeOutput[]> {
   const ff = config.pipeline.development.frontendFramework;
   const bf = config.pipeline.development.backendFramework;
+  const style = loadDesignStyle(config.pipeline.preview.stylePreset);
+  const gsapProfile = resolveGsapSkillProfile(style.id, style.styleMarkdown, ff);
+  writeGsapSkillManifest(projectDir, gsapProfile);
+  console.log(`GSAP skills: ${gsapProfile.skillIds.join(", ")}`);
 
   console.log("═══════════════════════════════════════");
   console.log(`  第 3 层：设计 → 代码 (开发模式 · ${ff.toUpperCase()} + ${bf.toUpperCase()})`);
@@ -843,7 +899,7 @@ async function designToCodeDev(brief: DesignBrief, projectDir: string): Promise<
 
   // 前端项目
   console.log("[1/2] 生成前端项目...");
-  const frontendOutputs = await generateDevFrontendProject(brief);
+  const frontendOutputs = await generateDevFrontendProject(brief, iterationFeedback, gsapProfile);
 
   // 后端项目
   console.log("[2/2] 生成后端项目...");

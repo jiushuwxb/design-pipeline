@@ -11,8 +11,9 @@
 
 import { readFileSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
-const rootDir = resolve(dirname(import.meta.url || "."), "..");
+const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const templateDir = resolve(rootDir, "development-code-template");
 
 export interface TemplateVariables {

@@ -10,7 +10,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import { config } from "../config.js";
 import { formatDesignStyleForPrompt, loadDesignStyle } from "../design-styles.js";
-import type { DesignBrief, DesignOutput } from "../types.js";
+import { DesignBrief, type DesignOutput } from "../types.js";
 
 function buildStitchPrompt(
   page: DesignBrief["pages"][0],
@@ -83,7 +83,7 @@ ${uiUxSkillBlock}
 export async function generateStitchPrompts(briefPath: string): Promise<DesignOutput[]> {
   console.log("\n[L2] Stitch prompt generation");
 
-  const brief: DesignBrief = JSON.parse(readFileSync(briefPath, "utf-8"));
+  const brief = DesignBrief.parse(JSON.parse(readFileSync(briefPath, "utf-8")));
   console.log(`Read design brief: ${brief.pages.length} page(s)`);
 
   let designSystem: string | undefined;
@@ -125,8 +125,25 @@ export async function generateStitchPrompts(briefPath: string): Promise<DesignOu
   const summaryPath = resolve(outDir, "_all_prompts.json");
   writeFileSync(summaryPath, JSON.stringify(outputs, null, 2), "utf-8");
 
+  const handoffPath = resolve(outDir, "stitch-handoff.json");
+  writeFileSync(handoffPath, JSON.stringify({
+    status: "awaiting-external-design",
+    generatedAt: new Date().toISOString(),
+    instructions: "Run each prompt through Stitch, then save results as stitch-results.json in this directory.",
+    resultSchema: {
+      pageName: "string",
+      stitchUrl: "optional string",
+      screenshot: "optional path or URL",
+      prompt: "original prompt",
+      status: "generated | failed | pending",
+      error: "optional string",
+    },
+    prompts: outputs.map((output) => ({ pageName: output.pageName, status: output.status })),
+  }, null, 2), "utf-8");
+
   console.log(`Prompt summary saved: ${summaryPath}`);
-  console.log("Next agent step: use Stitch MCP/skill to create the design draft, then confirm before code generation when operating interactively.");
+  console.log(`Stitch handoff saved: ${handoffPath}`);
+  console.log("No Stitch design has been claimed as generated. Add stitch-results.json after the external Stitch step; L3 will consume it automatically.");
 
   return outputs;
 }

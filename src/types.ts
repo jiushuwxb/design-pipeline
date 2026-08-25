@@ -136,6 +136,36 @@ export const ReviewReport = z.object({
 });
 export type ReviewReport = z.infer<typeof ReviewReport>;
 
+export const BuildVerification = z.object({
+  status: z.enum(["passed", "failed", "skipped"]),
+  projectPath: z.string(),
+  command: z.string().optional(),
+  checkedAt: z.string(),
+  output: z.string().default(""),
+});
+export type BuildVerification = z.infer<typeof BuildVerification>;
+
+export const VisualEvidenceReport = z.object({
+  status: z.enum(["passed", "failed"]),
+  capturedAt: z.string(),
+  screenshots: z.array(z.object({
+    route: z.string(),
+    viewport: z.string(),
+    path: z.string(),
+  })).min(1),
+  findings: z.array(z.string()).default([]),
+});
+export type VisualEvidenceReport = z.infer<typeof VisualEvidenceReport>;
+
+export const GsapSkillManifest = z.object({
+  enabled: z.boolean(),
+  framework: z.string(),
+  skills: z.array(z.enum(["gsap-core", "gsap-timeline", "gsap-scrolltrigger", "gsap-performance"])),
+  sources: z.array(z.string()),
+  generatedAt: z.string(),
+});
+export type GsapSkillManifest = z.infer<typeof GsapSkillManifest>;
+
 // ========== 流水线状态 ==========
 
 export const PipelineState = z.object({
@@ -152,6 +182,7 @@ export const PipelineState = z.object({
   backendOutputs: z.array(BackendCodeOutput).default([]),
   devProject: DevProjectOutput.optional(),
   reviewReport: ReviewReport.optional(),
+  buildVerification: BuildVerification.optional(),
   iteration: z.number().default(0),
   maxIterations: z.number().default(3),
 });

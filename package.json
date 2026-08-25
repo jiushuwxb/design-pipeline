@@ -11,7 +11,10 @@
     "layer4": "tsx src/layers/04-deploy-preview.ts",
     "layer5": "tsx src/layers/05-design-review.ts",
     "interactive": "tsx src/interactive.ts",
-    "doctor": "tsx src/doctor.ts"
+    "doctor": "tsx src/doctor.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts",
+    "check": "npm run typecheck && npm test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

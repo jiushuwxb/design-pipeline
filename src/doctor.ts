@@ -27,6 +27,11 @@ function isUiUxProMaxInstalled(): boolean {
   ].some((path) => existsSync(path));
 }
 
+function installedGsapSkills(): string[] {
+  return ["gsap-core", "gsap-timeline", "gsap-scrolltrigger", "gsap-performance"]
+    .filter((name) => existsSync(resolve(projectRoot, ".agents", "skills", name, "SKILL.md")));
+}
+
 function main() {
   console.log("Design Pipeline doctor\n");
 
@@ -71,6 +76,13 @@ function main() {
     ok("ui-ux-pro-max skill", "available for preview-mode prompt enhancement");
   } else {
     warn("ui-ux-pro-max skill", "project-bundled skill not found at .agents/skills/ui-ux-pro-max");
+  }
+
+  const gsapSkills = installedGsapSkills();
+  if (gsapSkills.length === 4) {
+    ok("GSAP restoration skills", gsapSkills.join(", "));
+  } else {
+    fail("GSAP restoration skills", `found ${gsapSkills.length}/4 in .agents/skills`);
   }
 
   try {

@@ -10,11 +10,11 @@
  * 4. 可访问性 - 颜色对比度、键盘导航、语义标签
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, readdirSync } from "fs";
 import { resolve } from "path";
 import { config } from "../config.js";
-import { callAI } from "../api.js";
-import type { DesignBrief, ReviewReport, ReviewIssue } from "../types.js";
+import { callAIJson } from "../api.js";
+import { BuildVerification, DesignBrief, ReviewReport, VisualEvidenceReport, type ReviewIssue } from "../types.js";
 
 const SYSTEM_PROMPT = `你是一个资深 UI/UX 设计评审专家。你的任务是对 AI 生成的设计方案进行全面评审。
 
@@ -52,21 +52,25 @@ const SYSTEM_PROMPT = `你是一个资深 UI/UX 设计评审专家。你的任�
 2. 每个问题必须给出具体的修复建议
 3. 重点关注组件状态覆盖和交互设计
 4. 只有 overallScore >= 80 才算通过
-5. 只返回 JSON，不要其他文字`;
+5. 构建未通过时必须判定为 critical，且总分不得达到 80
+6. 没有实际截图内容时，不得声称已经验证视觉质量、响应式布局或像素级一致性
+7. 只返回 JSON，不要其他文字`;
 
 export async function reviewDesign(briefPath: string): Promise<ReviewReport> {
   console.log("═══════════════════════════════════════");
   console.log("  第 5 层：AI 设计评审");
   console.log("═══════════════════════════════════════\n");
 
-  const brief: DesignBrief = JSON.parse(readFileSync(briefPath, "utf-8"));
+  const brief = DesignBrief.parse(JSON.parse(readFileSync(briefPath, "utf-8")));
   const projectDir = resolve(config.paths.output, brief.project);
 
   // 收集评审材料
   console.log("[1/3] 收集评审材料...");
 
   let codeContent = "";
-  const codeDir = resolve(projectDir, "generated-code");
+  const codeDir = config.pipeline.mode === "development"
+    ? resolve(projectDir, "dev-project")
+    : resolve(projectDir, "generated-code");
   try {
     codeContent = readFileSync(resolve(codeDir, "all-components.html"), "utf-8");
   } catch {
@@ -91,6 +95,20 @@ export async function reviewDesign(briefPath: string): Promise<ReviewReport> {
     }
   }
 
+  const buildPath = resolve(projectDir, "build-verification.json");
+  const buildVerification = existsSync(buildPath)
+    ? BuildVerification.parse(JSON.parse(readFileSync(buildPath, "utf-8")))
+    : { status: "skipped" as const, projectPath: "", checkedAt: new Date().toISOString(), output: "No build verification was produced." };
+
+  const visualDir = resolve(projectDir, "visual-evidence");
+  const visualEvidence = existsSync(visualDir)
+    ? readdirSync(visualDir).filter((name) => /\.(png|jpe?g|webp)$/i.test(name)).map((name) => resolve(visualDir, name))
+    : [];
+  const visualReviewPath = resolve(visualDir, "review.json");
+  const visualReview = existsSync(visualReviewPath)
+    ? VisualEvidenceReport.parse(JSON.parse(readFileSync(visualReviewPath, "utf-8")))
+    : null;
+
   // 构建评审 prompt
   const reviewPrompt = JSON.stringify(
     {
@@ -112,19 +130,47 @@ export async function reviewDesign(briefPath: string): Promise<ReviewReport> {
       generatedCode: codeContent
         ? `（代码已生成，共 ${codeContent.split("\n").length} 行）\n${codeContent.slice(0, 30000)}`
         : "(代码尚未生成，仅评审设计概要)",
+      buildVerification: {
+        status: buildVerification.status,
+        command: buildVerification.command,
+        output: buildVerification.output.slice(-8000),
+      },
+      visualEvidence: visualReview
+        ? { status: "browser-reviewed", report: visualReview, files: visualEvidence }
+        : { status: "unavailable", files: visualEvidence, note: "No validated browser review.json exists. This is a code/brief review only; do not claim visual or responsive verification." },
     },
     null,
     2
   );
 
   console.log("[2/3] AI 评审中...");
-  const result = await callAI({
+  const report = await callAIJson({
     system: SYSTEM_PROMPT,
     prompt: `请对以下设计方案进行评审：\n\n${reviewPrompt}`,
-    extractJson: true,
+    schema: ReviewReport,
+    schemaName: "ReviewReport",
   });
 
-  const report: ReviewReport = result.json;
+  if (buildVerification.status !== "passed") {
+    report.issues.unshift({
+      severity: "critical",
+      category: "performance",
+      description: buildVerification.status === "failed" ? "生成项目未通过构建验证" : "生成项目未执行构建验证",
+      location: buildVerification.projectPath || "generated project",
+      suggestion: `修复构建错误并重新执行验证。${buildVerification.output.slice(-1000)}`,
+    });
+    report.overallScore = Math.min(report.overallScore, 79);
+  }
+  if (visualReview?.status === "failed") {
+    report.issues.unshift({
+      severity: "major",
+      category: "usability",
+      description: "浏览器视觉验证未通过",
+      location: "visual-evidence/review.json",
+      suggestion: visualReview.findings.join("；") || "根据桌面端和移动端截图修复视觉问题后重新验证。",
+    });
+    report.overallScore = Math.min(report.overallScore, 79);
+  }
 
   // 判断是否需要迭代
   report.needIteration = report.overallScore < config.pipeline.reviewThreshold;

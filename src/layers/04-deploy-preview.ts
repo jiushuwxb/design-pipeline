@@ -9,7 +9,65 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 
 import { resolve } from "path";
 import { execSync } from "child_process";
 import { config } from "../config.js";
-import type { DesignBrief } from "../types.js";
+import { DesignBrief, type BuildVerification } from "../types.js";
+
+export interface PreviewResult {
+  url: string;
+  projectPath: string;
+  buildVerification: BuildVerification;
+}
+
+function verifyBuild(projectDir: string, projectOutputDir: string, command = "npm run build"): BuildVerification {
+  const checkedAt = new Date().toISOString();
+  let verification: BuildVerification;
+  try {
+    const output = execSync(command, {
+      cwd: projectDir,
+      stdio: "pipe",
+      timeout: 180_000,
+      maxBuffer: 4 * 1024 * 1024,
+    }).toString();
+    verification = { status: "passed", projectPath: projectDir, command, checkedAt, output: output.slice(-12000) };
+    console.log("  ✓ Build verification passed");
+  } catch (error: any) {
+    const output = [error?.stdout?.toString?.(), error?.stderr?.toString?.(), String(error)]
+      .filter(Boolean).join("\n").slice(-12000);
+    verification = { status: "failed", projectPath: projectDir, command, checkedAt, output };
+    console.log("  ✗ Build verification failed; review will require another iteration.");
+  }
+  writeFileSync(resolve(projectOutputDir, "build-verification.json"), JSON.stringify(verification, null, 2), "utf-8");
+  return verification;
+}
+
+function verifyStaticHtml(projectDir: string, projectOutputDir: string): BuildVerification {
+  const indexPath = resolve(projectDir, "index.html");
+  const passed = existsSync(indexPath) && readFileSync(indexPath, "utf-8").includes("<html");
+  const verification: BuildVerification = {
+    status: passed ? "passed" : "failed",
+    projectPath: projectDir,
+    command: "static HTML integrity check",
+    checkedAt: new Date().toISOString(),
+    output: passed ? `Found valid HTML entry: ${indexPath}` : `Missing or invalid HTML entry: ${indexPath}`,
+  };
+  writeFileSync(resolve(projectOutputDir, "build-verification.json"), JSON.stringify(verification, null, 2), "utf-8");
+  return verification;
+}
+
+function writeVisualEvidenceRequest(projectDir: string, previewPath: string, brief: DesignBrief): void {
+  const evidenceDir = resolve(projectDir, "visual-evidence");
+  mkdirSync(evidenceDir, { recursive: true });
+  writeFileSync(resolve(evidenceDir, "request.json"), JSON.stringify({
+    status: "awaiting-browser-capture",
+    previewPath,
+    generatedAt: new Date().toISOString(),
+    routes: brief.pages.map((page) => ({ name: page.name, route: page.route })),
+    viewports: [
+      { name: "desktop", width: 1440, height: 1000 },
+      { name: "mobile", width: 390, height: 844 },
+    ],
+    instructions: "Start the local preview, capture every route at both viewports, save images here, then write review.json with status, capturedAt, screenshots[{route,viewport,path}], and findings[].",
+  }, null, 2), "utf-8");
+}
 
 // ========== Vercel 部署（共享逻辑） ==========
 
@@ -57,7 +115,7 @@ function scaffoldReactProject(deployDir: string, srcDir: string, brief: DesignBr
   const pkg = {
     name: brief.project.replace(/\s+/g, "-").toLowerCase(), private: true, version: "0.0.1", type: "module",
     scripts: { dev: "vite", build: "tsc && vite build", preview: "vite preview" },
-    dependencies: { react: "^18.3.1", "react-dom": "^18.3.1", "react-router-dom": "^6.28.0" },
+    dependencies: { react: "^18.3.1", "react-dom": "^18.3.1", "react-router-dom": "^6.28.0", gsap: "^3.15.0", "@gsap/react": "^2.1.2" },
     devDependencies: { "@types/react": "^18.3.0", "@types/react-dom": "^18.3.0", "@vitejs/plugin-react": "^4.3.0", autoprefixer: "^10.4.0", postcss: "^8.4.0", tailwindcss: "^3.4.0", typescript: "^5.7.0", vite: "^6.0.0" },
   };
   writeFileSync(resolve(deployDir, "package.json"), JSON.stringify(pkg, null, 2), "utf-8");
@@ -93,7 +151,7 @@ function scaffoldVueProject(deployDir: string, srcDir: string, brief: DesignBrie
   const pkg = {
     name: brief.project.replace(/\s+/g, "-").toLowerCase(), private: true, version: "0.0.1", type: "module",
     scripts: { dev: "vite", build: "vite build", preview: "vite preview" },
-    dependencies: { vue: "^3.5.0", "vue-router": "^4.4.0" },
+    dependencies: { vue: "^3.5.0", "vue-router": "^4.4.0", gsap: "^3.15.0" },
     devDependencies: { "@vitejs/plugin-vue": "^5.2.0", typescript: "~5.7.0", vite: "^6.0.0", "vue-tsc": "^2.2.0", tailwindcss: "^3.4.0", postcss: "^8.4.0", autoprefixer: "^10.4.0" },
   };
   writeFileSync(resolve(deployDir, "package.json"), JSON.stringify(pkg, null, 2), "utf-8");
@@ -134,7 +192,7 @@ function scaffoldVueProject(deployDir: string, srcDir: string, brief: DesignBrie
 
 // ========== 静态 HTML 部署 ==========
 
-function deployStaticHTML(projectDir: string, brief: DesignBrief): { url: string; projectPath: string } {
+function deployStaticHTML(projectDir: string, brief: DesignBrief): PreviewResult {
   const staticDir = resolve(projectDir, "deploy-static");
   mkdirSync(staticDir, { recursive: true });
 
@@ -163,7 +221,9 @@ function deployStaticHTML(projectDir: string, brief: DesignBrief): { url: string
   if (deployUrl) console.log(`  Vercel URL: ${deployUrl}`);
   console.log(`  (静态 HTML 直接可用浏览器打开 index.html) \n`);
 
-  return { url: deployUrl, projectPath: staticDir };
+  const buildVerification = verifyStaticHtml(staticDir, projectDir);
+  writeVisualEvidenceRequest(projectDir, staticDir, brief);
+  return { url: deployUrl, projectPath: staticDir, buildVerification };
 }
 
 function walkDir(dir: string, _dest: string, _ext: string, _brief: DesignBrief): void {
@@ -172,10 +232,10 @@ function walkDir(dir: string, _dest: string, _ext: string, _brief: DesignBrief):
 
 // ========== 主入口 ==========
 
-export async function deployPreview(briefPath: string): Promise<{ url: string; projectPath: string }> {
+export async function deployPreview(briefPath: string): Promise<PreviewResult> {
   const mode = config.pipeline.mode;
   const framework = config.pipeline.preview.framework;
-  const brief: DesignBrief = JSON.parse(readFileSync(briefPath, "utf-8"));
+  const brief = DesignBrief.parse(JSON.parse(readFileSync(briefPath, "utf-8")));
   const projectDir = resolve(config.paths.output, brief.project);
 
   // === HTML 静态模式 ===
@@ -229,6 +289,9 @@ export async function deployPreview(briefPath: string): Promise<{ url: string; p
     console.log("  ⚠ 依赖安装失败:", String(err).slice(0, 200));
   }
 
+  const buildVerification = verifyBuild(deployDir, projectDir);
+  writeVisualEvidenceRequest(projectDir, deployDir, brief);
+
   // Vercel 部署
   console.log("[4/5] Vercel 部署...");
   const deployUrl = deployToVercel(deployDir);
@@ -241,7 +304,7 @@ export async function deployPreview(briefPath: string): Promise<{ url: string; p
   if (deployUrl) console.log(`  Vercel URL: ${deployUrl}`);
   console.log("");
 
-  return { url: deployUrl || "", projectPath: deployDir };
+  return { url: deployUrl || "", projectPath: deployDir, buildVerification };
 }
 
 /** 开发模式：部署 L3 生成的完整前端项目 */
@@ -255,7 +318,9 @@ function deployDevProject(projectDir: string, brief: DesignBrief) {
 
   if (!existsSync(devFrontendDir)) {
     console.log("  ⚠ 开发项目尚未生成，请先运行 L3\n");
-    return { url: "", projectPath: "" };
+    const buildVerification: BuildVerification = { status: "failed", projectPath: devFrontendDir, checkedAt: new Date().toISOString(), output: "Development frontend was not generated." };
+    writeFileSync(resolve(projectDir, "build-verification.json"), JSON.stringify(buildVerification, null, 2), "utf-8");
+    return { url: "", projectPath: "", buildVerification };
   }
 
   // 安装前端依赖
@@ -279,6 +344,9 @@ function deployDevProject(projectDir: string, brief: DesignBrief) {
     }
   }
 
+  const buildVerification = verifyBuild(devFrontendDir, projectDir);
+  writeVisualEvidenceRequest(projectDir, devFrontendDir, brief);
+
   // 部署前端预览
   console.log("[3/3] Vercel 部署前端...");
   const deployUrl = deployToVercel(devFrontendDir);
@@ -291,7 +359,7 @@ function deployDevProject(projectDir: string, brief: DesignBrief) {
   if (deployUrl) console.log(`  前端预览: ${deployUrl}`);
   console.log("");
 
-  return { url: deployUrl, projectPath: devFrontendDir };
+  return { url: deployUrl, projectPath: devFrontendDir, buildVerification };
 }
 
 // ========== 工具 ==========

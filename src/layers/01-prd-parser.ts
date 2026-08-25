@@ -7,8 +7,8 @@
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { config } from "../config.js";
-import { callAI } from "../api.js";
-import type { DesignBrief } from "../types.js";
+import { callAIJson } from "../api.js";
+import { DesignBrief, type DesignBrief as DesignBriefType } from "../types.js";
 
 const SYSTEM_PROMPT = `你是一个资深产品需求分析师。从产品需求文档中提取结构化设计概要。
 
@@ -43,7 +43,7 @@ const SYSTEM_PROMPT = `你是一个资深产品需求分析师。从产品需求
 
 规则：推断所有页面、标注组件状态和交互、识别共享组件。只返回 JSON。`;
 
-export async function parsePRD(prdPath: string): Promise<DesignBrief> {
+export async function parsePRD(prdPath: string): Promise<DesignBriefType> {
   console.log("═══════════════════════════════════════");
   console.log("  第 1 层：PRD 需求解析");
   console.log("═══════════════════════════════════════\n");
@@ -52,13 +52,12 @@ export async function parsePRD(prdPath: string): Promise<DesignBrief> {
   console.log(`[1/3] 读取 PRD: ${prdPath} (${prdContent.length} 字符)`);
   console.log("[2/3] AI 解析中...");
 
-  const result = await callAI({
+  const brief = await callAIJson({
     system: SYSTEM_PROMPT,
     prompt: `分析 PRD 文档，提取结构化设计概要：\n\n<prd>\n${prdContent}\n</prd>`,
-    extractJson: true,
+    schema: DesignBrief,
+    schemaName: "DesignBrief",
   });
-
-  const brief = result.json as DesignBrief;
   console.log(`[3/3] 解析完成: ${brief.pages.length} 页面, ${brief.sharedComponents?.length || 0} 共享组件`);
 
   for (const page of brief.pages) {
